@@ -1,0 +1,17 @@
+services:
+  B1:
+    image: "ghcr.io/petrih-alifsemi/sdk-alif:zas-main"
+    stdin_open: true
+    tty: true
+    volumes:
+      - ${SSH_AUTH_SOCK}:${SSH_AUTH_SOCK}
+      - ${PWD}/sample_app:/root/alif/myapp
+    environment:
+      - SSH_AUTH_SOCK=${SSH_AUTH_SOCK}
+    working_dir: /root/alif
+    command: bash -c "
+        pip install --upgrade pip &&
+        pip3 install --no-cache-dir -r zephyr/scripts/requirements.txt &&
+        pip3 install --no-cache-dir -r bootloader/mcuboot/scripts/requirements.txt &&
+        west build --build-dir myapp/build -b alif_b1_dk/ab1c1f4m51820ph0/rtss_he myapp
+      "
