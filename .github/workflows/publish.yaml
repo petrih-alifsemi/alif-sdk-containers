@@ -1,0 +1,57 @@
+name: Alif SDK Development Containers
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  reponame: ${{ github.repository_owner }}
+  #reponame: alifsemi
+
+jobs:
+  containers:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        version: [
+          {name: "zas-v1.5", sdk: "0.16.9", branch: "v1.5-zas-branch"},
+          {name: "zas-main", sdk: "0.17.0", branch: "main"}
+        ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log into GitHub Container Registry
+        # if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push base image
+        id: build-and-push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./sdk-alif/Dockerfile
+          # push: ${{ github.event_name != 'pull_request' }}
+          push: true
+          #platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
+          provenance: false
+          tags: ghcr.io/${{ env.reponame }}/sdk-alif:${{ matrix.version.name }}
+          build-args: |
+            ZEPHYR_SDK_VERSION=${{ matrix.version.sdk }}
+            SDK_VERSION=${{ matrix.version.branch }}
