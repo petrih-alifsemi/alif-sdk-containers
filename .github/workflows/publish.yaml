@@ -3,12 +3,17 @@ name: Alif SDK Development Containers
 on:
   push:
     branches: [ main ]
+    paths:
+      - '.github/**'
+      - 'sdk-alif/**'
   pull_request:
     branches: [ main ]
+    paths:
+      - '.github/**'
+      - 'sdk-alif/**'
 
 env:
   reponame: ${{ github.repository_owner }}
-  #reponame: alifsemi
 
 jobs:
   containers:
@@ -22,6 +27,7 @@ jobs:
       matrix:
         version: [
           {name: "zas-v1.5", sdk: "0.16.9", branch: "v1.5-zas-branch"},
+          {name: "zas-v2.0", sdk: "0.17.0", branch: "v2.0-zas-branch"},
           {name: "zas-main", sdk: "0.17.0", branch: "main"}
         ]
 
