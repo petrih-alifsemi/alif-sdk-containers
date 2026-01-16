@@ -26,12 +26,16 @@ jobs:
         version: [
           {name: "zas-v1.5", sdk: "0.16.9", branch: "v1.5-zas-branch"},
           {name: "zas-v2.0", sdk: "0.17.0", branch: "v2.0-zas-branch"},
+          {name: "zas-v2.1", sdk: "0.17.0", branch: "v2.1-zas-branch"},
           {name: "zas-main", sdk: "0.17.0", branch: "main"}
         ]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@v3
