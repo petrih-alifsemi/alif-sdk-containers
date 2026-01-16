@@ -1,5 +1,13 @@
 # Based on Debian 12 (Bookworm) + Python 3.12
-FROM python:3.12-slim-bookworm
+FROM --platform=$BUILDPLATFORM python:3.12-slim-bookworm
+ARG TARGETARCH
+
+# Map TARGETARCH to toolchain architecture naming
+RUN case ${TARGETARCH} in \
+      arm64) ARCH=aarch64 ;; \
+      amd64|*) ARCH=x86_64 ;; \
+    esac && \
+    echo ${ARCH} > /tmp/toolchain_arch.txt
 
 ARG SDK_DIR=/root/alif
 
@@ -31,8 +39,10 @@ RUN apt update && \
     echo "cache_dir = /tmp/ccache" >> /etc/ccache.conf
 
 ## Toolchain (Zephyr SDK)
+# aarch64 for Apple and x86_64 for Intel/AMD
 ARG ZEPHYR_SDK_VERSION=0.16.9
-RUN wget -c https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64_minimal.tar.xz -O - \
+RUN TOOLCHAIN_ARCH=$(cat /tmp/toolchain_arch.txt) && \
+    wget -c https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-${TOOLCHAIN_ARCH}_minimal.tar.xz -O - \
     | tar -JxC /opt && \
     /opt/zephyr-sdk-${ZEPHYR_SDK_VERSION}/setup.sh -t arm-zephyr-eabi
 
